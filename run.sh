@@ -53,9 +53,20 @@ echo "== cek device =="
 "$ADB" shell 'su -c id' 2>/dev/null | grep -q 'uid=0' || { echo "HP tidak rooted (butuh su)"; exit 1; }
 
 echo "== start mitmproxy (FILTER=$FILTER) =="
-# bunuh yang lama di port ini
-if command -v taskkill >/dev/null 2>&1; then taskkill //F //IM mitmdump.exe >/dev/null 2>&1 || true; else pkill -f mitmdump >/dev/null 2>&1 || true; fi
-sleep 1
+# Matikan mitmproxy lama yang masih memegang PORT.
+# PENTING (Windows): mitmdump.exe cuma LAUNCHER — proses asli = python.exe. Jadi kill by-PORT
+# (bukan by-name), supaya port benar-benar bebas & tidak error "address already in use".
+kill_port() {
+  if command -v netstat >/dev/null 2>&1 && command -v taskkill >/dev/null 2>&1; then
+    for pid in $(netstat -ano 2>/dev/null | grep -i LISTENING | grep ":$1 " | awk '{print $NF}' | sort -u); do
+      taskkill //F //PID "$pid" >/dev/null 2>&1 || true
+    done
+  fi
+  command -v fuser >/dev/null 2>&1 && fuser -k "$1/tcp" >/dev/null 2>&1 || true   # Linux/mac
+  command -v pkill >/dev/null 2>&1 && pkill -f "mitmdump" >/dev/null 2>&1 || true # fallback
+}
+kill_port "$PORT"
+sleep 2
 rm -f "$DIR/all.txt" "$DIR/capture.txt"
 CAP_FILTER="$FILTER" CAP_OUT="$DIR" "$MITMDUMP" -s "$(winpath "$DIR/capture.py")" --listen-host 0.0.0.0 -p "$PORT" --set block_global=false > "$DIR/mitm.log" 2>&1 &
 sleep 4
