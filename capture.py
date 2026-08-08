@@ -1,6 +1,9 @@
 # mitmproxy addon — capture traffic HP dengan filter configurable.
-# FILTER env: nama domain (mis. "flip.id") = cuma log request ke domain itu secara DETAIL.
-#             "all" (default) = log SEMUA request secara detail.
+# FILTER env:
+#   "flip.id"  -> cuma log DETAIL request ke domain itu.
+#   "all"      -> log SEMUA request secara detail.
+#   "auto"     -> log semua KECUALI domain "noise" umum (google/analytics/iklan/crash/dll).
+#                 Dipakai mode PKG: buka 1 app, sisanya tinggal domain app itu sendiri.
 # Output:
 #   OUT_DIR/all.txt      -> ringkas SEMUA request (METHOD host/path) — buat lihat endpoint apa aja
 #   OUT_DIR/capture.txt  -> DETAIL (header + body request & response) sesuai FILTER
@@ -13,12 +16,33 @@ ALL = os.path.join(OUT_DIR, "all.txt")
 CAP = os.path.join(OUT_DIR, "capture.txt")
 MAXBODY = int(os.environ.get("CAP_MAXBODY", "3000"))
 
+# Domain "noise" yang biasanya BUKAN API app target (buat mode "auto").
+NOISE = (
+    "google.com", "googleapis.com", "gstatic.com", "googleusercontent.com",
+    "google-analytics.com", "googletagmanager.com", "googlesyndication.com",
+    "doubleclick.net", "app-measurement.com", "firebaseio.com",
+    "firebaseinstallations.googleapis.com", "firebaseremoteconfig.googleapis.com",
+    "crashlytics.com", "crashlyticsreports-pa.googleapis.com", "sentry.io",
+    "bugsnag.com", "facebook.com", "fbcdn.net", "graph.facebook.com",
+    "appsflyer.com", "adjust.com", "branch.io", "onesignal.com",
+    "cloudflareinsights.com", "gvt1.com", "gvt2.com", "ntp.org",
+    "mozilla.org", "gpush", "clients3.google.com", "connectivitycheck",
+)
+
 def _w(path, s):
     with open(path, "a", encoding="utf-8") as f:
         f.write(s)
 
+def _is_noise(host):
+    h = host.lower()
+    return any(n in h for n in NOISE)
+
 def _match(host):
-    return FILTER == "all" or FILTER in host.lower()
+    if FILTER == "all":
+        return True
+    if FILTER == "auto":
+        return not _is_noise(host)
+    return FILTER in host.lower()
 
 def request(flow: http.HTTPFlow):
     # ringkas semua (biar keliatan endpoint apa aja yang jalan)

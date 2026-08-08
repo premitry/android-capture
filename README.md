@@ -15,22 +15,25 @@ Cocok buat reverse-engineering API aplikasi (endpoint, header, body) — mis. ap
    - **Windows** → klik kanan folder → **"Git Bash Here"** (atau *Open in Terminal* → pilih **Git Bash**).
      Ini skrip **bash**, jadi **bukan** `cmd.exe` / PowerShell.
    - **Linux / macOS** → buka Terminal, `cd` ke folder itu.
-3. **Set target** (cara paling gampang) — buka [`target.txt`](target.txt), isi:
-   ```
-   DOMAIN=nama-domain.com     # domain yang mau di-detail. KOSONGKAN = capture semua app.
-   PKG=com.nama.app           # opsional: auto-buka app ini. Kosongkan = buka manual di HP.
-   ```
-   lalu cukup jalankan:
-   ```bash
-   ./run.sh
-   ```
-   > Kalau `DOMAIN` di `target.txt` **dikosongkan**, otomatis **capture SEMUA app**.
+3. **Set target** (cara paling gampang) — buka [`target.txt`](target.txt), isi lalu jalankan `./run.sh`.
 
-   **Alternatif** — kasih target langsung lewat argumen (mengalahkan `target.txt`):
+   Ada **3 mode** tergantung yang kamu isi:
+
+   | Isi target.txt | Mode | Hasil |
+   |---|---|---|
+   | `DOMAIN=api.contoh.com` | **Filter domain** | Cuma detail request ke domain itu |
+   | `PKG=com.nama.app` (DOMAIN kosong) | **AUTO by-app** ⭐ | Buka app itu, tampilkan **domain app-nya**, domain *noise* (google/analytics/iklan/crash/dll) dibuang otomatis |
+   | dua-duanya kosong | **Semua** | Capture semua app |
+
+   > **Belum tau domainnya?** Pakai mode **AUTO by-app** — cukup tau nama app-nya.
+   > Cari package name: `adb shell pm list packages | grep <kata-kunci>`.
+
+   **Alternatif** — lewat argumen (mengalahkan `target.txt`):
    ```bash
    ./run.sh                          # capture SEMUA app
-   ./run.sh nama-domain.com          # filter: cuma detail request ke domain itu
-   ./run.sh nama-domain.com com.nama.app   # filter + auto-buka app-nya
+   ./run.sh api.contoh.com           # filter domain
+   ./run.sh api.contoh.com com.nama.app   # filter domain + auto-buka app
+   ./run.sh "" com.nama.app          # AUTO by-app (buka app, tampilkan domainnya)
    ```
 
 4. **Buka app di HP & lakukan aksinya** (mis. login / cek rekening).
@@ -53,8 +56,15 @@ tail -f capture.txt    # detail yang cocok filter
 
 ### Beda "capture all" vs "filter"
 - `all.txt` **selalu** mencatat SEMUA request (biar kamu tau app manggil domain apa aja).
-- `capture.txt` cuma mencatat **detail** untuk request yang **cocok `FILTER`**. Kalau `FILTER=all`,
-  semua di-detail (bisa besar). Kalau `FILTER=nama-domain.com`, cuma domain itu yang di-detail → rapi & fokus.
+- `capture.txt` mencatat **detail** untuk request yang cocok mode-nya:
+  - **filter domain** → cuma domain itu.
+  - **AUTO by-app** → semua **kecuali** domain *noise* (google/analytics/iklan/crash/dll) → tinggal API app-nya.
+  - **all** → semua (bisa besar).
+
+> **Catatan by-app:** mode AUTO memfilter dengan **membuang domain noise umum**, jadi paling akurat kalau kamu
+> buka **hanya app target** (app lain di background bisa nyelip kalau domainnya bukan noise). Untuk isolasi
+> **per-app 100%** (per-UID), tool berbasis **VpnService** (mis. PCAPdroid) lebih pas — itu beda mekanisme
+> dari proxy. Daftar domain noise bisa kamu tambah/edit di [`capture.py`](capture.py) (variabel `NOISE`).
 
 ---
 

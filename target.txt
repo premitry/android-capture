@@ -2,10 +2,15 @@
 # Isi target di sini, lalu jalankan:  ./run.sh
 # (argumen di command-line kalau diisi akan MENGALAHKAN file ini.)
 #
+# Ada 3 mode (tergantung yang kamu isi):
+#   1) DOMAIN diisi        -> filter domain itu saja (paling fokus).
+#   2) hanya PKG diisi      -> AUTO by-app: buka app itu, tampilkan domain APP-nya,
+#                             domain "noise" (google/analytics/iklan/crash/dll) dibuang otomatis.
+#                             Cocok kalau kamu belum tau domainnya — cukup tau nama app-nya.
+#   3) dua-duanya kosong    -> capture SEMUA app.
+#
 # DOMAIN = domain yang mau di-detail (mis. bank.example.com).
-#          KOSONGKAN  -> capture SEMUA app (semua request di-detail).
-# PKG    = package name app buat auto-buka (opsional, mis. com.nama.app).
-#          Kosongkan -> app dibuka manual di HP.
+# PKG    = package name app (mis. com.nama.app). Cari dgn: adb shell pm list packages | grep <kata>
 #
 # Baris diawali '#' = komentar (diabaikan).
 

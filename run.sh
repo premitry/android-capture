@@ -3,7 +3,9 @@
 # Pakai:
 #   ./run.sh                               # capture SEMUA app
 #   ./run.sh nama-domain.com               # filter: cuma detail request ke domain itu
-#   ./run.sh nama-domain.com com.nama.app  # + auto-buka app-nya
+#   ./run.sh nama-domain.com com.nama.app  # filter domain + auto-buka app
+#   ./run.sh "" com.nama.app               # AUTO by-app: buka app, tampilkan domainnya (buang noise)
+# (atau isi DOMAIN / PKG di target.txt — PKG doang = mode AUTO by-app)
 #
 # Prasyarat: HP rooted + USB debugging, adb, mitmproxy (pip install mitmproxy), openssl.
 # Untuk app ber-SSL-pinning (umum di app bank/e-wallet): pasang modul LSPosed "TrustMe"
@@ -25,9 +27,18 @@ if [ -z "$FILTER" ] && [ -f "$DIR/target.txt" ]; then
   [ -n "$T_DOMAIN" ] && FILTER="$T_DOMAIN"
   [ -z "$PKG" ] && [ -n "$T_PKG" ] && PKG="$T_PKG"
 fi
-# kosong = capture semua
-FILTER="${FILTER:-all}"
-[ "$FILTER" = "all" ] && echo "Target: (kosong) -> capture SEMUA app" || echo "Target: $FILTER${PKG:+  (auto-buka: $PKG)}"
+# Tentukan mode:
+#   DOMAIN diisi          -> filter domain itu
+#   DOMAIN kosong + PKG    -> "auto": buka app, tampilkan domainnya, buang noise (google/iklan/dll)
+#   dua-duanya kosong      -> "all": capture semua app
+if [ -z "$FILTER" ]; then
+  if [ -n "$PKG" ]; then FILTER="auto"; else FILTER="all"; fi
+fi
+case "$FILTER" in
+  all)  echo "Mode: SEMUA app (capture semua)";;
+  auto) echo "Mode: AUTO by-app${PKG:+ ($PKG)} -> tampilkan domain app, buang noise";;
+  *)    echo "Mode: filter domain '$FILTER'${PKG:+  (auto-buka: $PKG)}";;
+esac
 
 # konversi path ke Windows kalau di git-bash (buat openssl.exe & adb push source)
 winpath() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else echo "$1"; fi; }
