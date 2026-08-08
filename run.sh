@@ -9,13 +9,25 @@
 # Untuk app ber-SSL-pinning (umum di app bank/e-wallet): pasang modul LSPosed "TrustMe"
 # (APK ada di modules/) + scope ke app-nya dulu.
 set -e
-FILTER="${1:-all}"
-PKG="${2:-}"
 PORT="${PORT:-8080}"
 ADB="${ADB:-adb}"
 MITMDUMP="${MITMDUMP:-mitmdump}"
 DIR="$(cd "$(dirname "$0")" && pwd)"
 export MSYS_NO_PATHCONV=1   # Windows/git-bash: jangan translate path /data/...
+
+# Target: argumen command-line kalau ada; kalau tidak, baca dari target.txt.
+FILTER="${1:-}"
+PKG="${2:-}"
+if [ -z "$FILTER" ] && [ -f "$DIR/target.txt" ]; then
+  # ambil DOMAIN= dan PKG= (abaikan komentar/spasi)
+  T_DOMAIN="$(grep -E '^[[:space:]]*DOMAIN[[:space:]]*=' "$DIR/target.txt" | tail -1 | cut -d= -f2- | tr -d '[:space:]')"
+  T_PKG="$(grep -E '^[[:space:]]*PKG[[:space:]]*=' "$DIR/target.txt" | tail -1 | cut -d= -f2- | tr -d '[:space:]')"
+  [ -n "$T_DOMAIN" ] && FILTER="$T_DOMAIN"
+  [ -z "$PKG" ] && [ -n "$T_PKG" ] && PKG="$T_PKG"
+fi
+# kosong = capture semua
+FILTER="${FILTER:-all}"
+[ "$FILTER" = "all" ] && echo "Target: (kosong) -> capture SEMUA app" || echo "Target: $FILTER${PKG:+  (auto-buka: $PKG)}"
 
 # konversi path ke Windows kalau di git-bash (buat openssl.exe & adb push source)
 winpath() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else echo "$1"; fi; }

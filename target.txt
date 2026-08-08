@@ -1,0 +1,13 @@
+# ===== SETTING TARGET CAPTURE =====
+# Isi target di sini, lalu jalankan:  ./run.sh
+# (argumen di command-line kalau diisi akan MENGALAHKAN file ini.)
+#
+# DOMAIN = domain yang mau di-detail (mis. bank.example.com).
+#          KOSONGKAN  -> capture SEMUA app (semua request di-detail).
+# PKG    = package name app buat auto-buka (opsional, mis. com.nama.app).
+#          Kosongkan -> app dibuka manual di HP.
+#
+# Baris diawali '#' = komentar (diabaikan).
+
+DOMAIN=
+PKG=

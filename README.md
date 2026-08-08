@@ -15,13 +15,23 @@ Cocok buat reverse-engineering API aplikasi (endpoint, header, body) — mis. ap
    - **Windows** → klik kanan folder → **"Git Bash Here"** (atau *Open in Terminal* → pilih **Git Bash**).
      Ini skrip **bash**, jadi **bukan** `cmd.exe` / PowerShell.
    - **Linux / macOS** → buka Terminal, `cd` ke folder itu.
-3. Jalankan salah satu:
+3. **Set target** (cara paling gampang) — buka [`target.txt`](target.txt), isi:
+   ```
+   DOMAIN=nama-domain.com     # domain yang mau di-detail. KOSONGKAN = capture semua app.
+   PKG=com.nama.app           # opsional: auto-buka app ini. Kosongkan = buka manual di HP.
+   ```
+   lalu cukup jalankan:
+   ```bash
+   ./run.sh
+   ```
+   > Kalau `DOMAIN` di `target.txt` **dikosongkan**, otomatis **capture SEMUA app**.
 
-```bash
-./run.sh                          # 1) capture SEMUA app
-./run.sh nama-domain.com          # 2) filter: cuma detail request ke domain itu
-./run.sh nama-domain.com com.nama.app   # 3) filter + auto-buka app-nya
-```
+   **Alternatif** — kasih target langsung lewat argumen (mengalahkan `target.txt`):
+   ```bash
+   ./run.sh                          # capture SEMUA app
+   ./run.sh nama-domain.com          # filter: cuma detail request ke domain itu
+   ./run.sh nama-domain.com com.nama.app   # filter + auto-buka app-nya
+   ```
 
 4. **Buka app di HP & lakukan aksinya** (mis. login / cek rekening).
 5. **Hasilnya otomatis tersimpan di folder yang sama** (folder tool ini):
