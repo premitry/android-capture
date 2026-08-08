@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Setup capture traffic HP Android (rooted) lewat mitmproxy.
 # Pakai:
-#   ./run.sh                 # capture SEMUA app
-#   ./run.sh flip.id         # filter: cuma detail request ke domain flip.id
-#   ./run.sh flip.id id.flip # + auto-buka app id.flip
+#   ./run.sh                               # capture SEMUA app
+#   ./run.sh nama-domain.com               # filter: cuma detail request ke domain itu
+#   ./run.sh nama-domain.com com.nama.app  # + auto-buka app-nya
 #
 # Prasyarat: HP rooted + USB debugging, adb, mitmproxy (pip install mitmproxy), openssl.
-# Untuk app ber-SSL-pinning (mis. Flip): pasang modul LSPosed "TrustMe" + scope ke app-nya dulu.
+# Untuk app ber-SSL-pinning (umum di app bank/e-wallet): pasang modul LSPosed "TrustMe"
+# (APK ada di modules/) + scope ke app-nya dulu.
 set -e
 FILTER="${1:-all}"
 PKG="${2:-}"
@@ -18,6 +19,11 @@ export MSYS_NO_PATHCONV=1   # Windows/git-bash: jangan translate path /data/...
 
 # konversi path ke Windows kalau di git-bash (buat openssl.exe & adb push source)
 winpath() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else echo "$1"; fi; }
+
+echo "== cek dependency =="
+command -v "$ADB" >/dev/null 2>&1 || { echo "❌ adb tidak ditemukan. Install platform-tools, atau set env ADB=/path/ke/adb.exe"; exit 1; }
+command -v "$MITMDUMP" >/dev/null 2>&1 || { echo "❌ mitmdump tidak ditemukan. Install: pip install mitmproxy (atau set env MITMDUMP=/path/ke/mitmdump)"; exit 1; }
+command -v openssl >/dev/null 2>&1 || { echo "❌ openssl tidak ditemukan. Di Windows biasanya ikut Git for Windows."; exit 1; }
 
 echo "== cek device =="
 "$ADB" get-state >/dev/null 2>&1 || { echo "HP tidak terhubung / belum authorize adb"; exit 1; }
