@@ -24,9 +24,10 @@ NOISE = (
     "firebaseinstallations.googleapis.com", "firebaseremoteconfig.googleapis.com",
     "crashlytics.com", "crashlyticsreports-pa.googleapis.com", "sentry.io",
     "bugsnag.com", "facebook.com", "fbcdn.net", "graph.facebook.com",
-    "appsflyer.com", "adjust.com", "branch.io", "onesignal.com",
+    "appsflyer", "adjust.com", "branch.io", "onesignal.com",
     "cloudflareinsights.com", "gvt1.com", "gvt2.com", "ntp.org",
     "mozilla.org", "gpush", "clients3.google.com", "connectivitycheck",
+    "mixpanel.com", "split.io", "audid-api.taobao", "umeng", "amap.com",
 )
 
 def _w(path, s):

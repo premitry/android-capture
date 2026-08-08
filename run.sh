@@ -68,7 +68,8 @@ kill_port() {
 kill_port "$PORT"
 sleep 2
 rm -f "$DIR/all.txt" "$DIR/capture.txt"
-CAP_FILTER="$FILTER" CAP_OUT="$DIR" "$MITMDUMP" -s "$(winpath "$DIR/capture.py")" --listen-host 0.0.0.0 -p "$PORT" --set block_global=false > "$DIR/mitm.log" 2>&1 &
+# CAP_OUT WAJIB path Windows kalau mitmdump = Python Windows (msys path /d/... tidak dikenali → gagal tulis file).
+CAP_FILTER="$FILTER" CAP_OUT="$(winpath "$DIR")" "$MITMDUMP" -s "$(winpath "$DIR/capture.py")" --listen-host 0.0.0.0 -p "$PORT" --set block_global=false > "$DIR/mitm.log" 2>&1 &
 sleep 4
 
 echo "== install CA mitmproxy ke system store (bind-mount) =="
